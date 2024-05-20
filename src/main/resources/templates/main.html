@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+<html lang="ko" layout:decorate="~{layout}">
 <body>
-<div class="bg-yellow-400"
+<div layout:fragment="content"
      th:with="notebookList=${mainDataDto.notebookList},
         noteList=${mainDataDto.noteList},
         targetNotebook=${mainDataDto.targetNotebook},
@@ -14,17 +8,62 @@
     <div class="bg-blue-300">
         <a href="/">logo</a>
     </div>
-    <div class="bg-red-600 flex">
+    <div class="flex">
         <div class="bg-indigo-300 w-[20%]">
-            <ul class="h-[100%] overflow-scroll">
-                <li th:each="notebook : ${notebookList}" th:class="${notebook.id == targetNotebook.id} ? 'bg-blue-600' : ''">
-                    <a th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
+            <ul class="menu h-[100%] overflow-scroll">
+                <li th:each="notebook : ${notebookList}"
+                    th:with="basic='w-[90%] p-[10px]'">
+                    <th:block th:if="${!#lists.isEmpty(notebook.children)}">
+                        <details open>
+                            <summary class="flex p-0"><a th:class="${basic}"
+                                                         th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600':''"
+                                                         th:href="@{|/books/${notebook.id}|}"
+                                                         th:text="${notebook.name}"></a></summary>
+                            <ul>
+                                <li th:each="child : ${notebook.children}">
+                                    <a th:class="${basic}"
+                                       th:classappend="${child.id == targetNotebook.id} ? 'bg-blue-600' : '' "
+                                       th:href="@{|/books/${child.id}|}" th:text="${child.name}"></a>
+                                </li>
+                            </ul>
+                        </details>
+                    </th:block>
+                    <th:block th:if="${#lists.isEmpty(notebook.children) and notebook.parent == null}">
+                        <a th:class="${basic}"
+                           th:classappend="${notebook.id == targetNotebook.id} ? 'bg-blue-600' : '' "
+                           th:href="@{|/books/${notebook.id}|}" th:text="${notebook.name}"></a>
+                    </th:block>
                 </li>
             </ul>
 
             <form th:action="@{|/books/write|}" method="post">
                 <input type="submit" value="추가">
             </form>
+
+            <form th:action="@{|/groups/${targetNotebook.id}/books/write|}" method="post">
+                <input type="submit" value="하위 노트북 추가">
+            </form>
+            <form th:action="@{|/books/${targetNotebook.id}/delete|}" method="post">
+                <input type="submit" value="삭제">
+            </form>
+            <label for="my_modal_6" class="btn">노트 이름 변경</label>
+            <a href="/signup" class="btn">회원 가입</a>
+            <a href="/logout" class="btn">로그아웃</a>
+
+            <!-- Put this part before </body> tag -->
+            <input type="checkbox" id="my_modal_6" class="modal-toggle" />
+            <div class="modal" role="dialog">
+                <div class="modal-box flex flex-col items-center">
+                    <form th:action="@{|/books/${targetNotebook.id}/update|}" class="flex" method="post">
+                        <input type="hidden" name="targetNoteId" th:value="${targetNote.id}">
+                        <input type="text" name="name" class="border-2" th:value="${targetNotebook.name}">
+                        <input type="submit" class="btn">
+                    </form>
+                    <div class="modal-action flex justify-center">
+                        <label for="my_modal_6" class="btn">Close!</label>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="bg-red-300 w-[20%] h-[800px] text-center ">
             <ul class="h-[100%] overflow-scroll">
@@ -38,41 +77,56 @@
             </form>
         </div>
 
-        <div class="bg-green-300 w-[60%]">
-            <form th:action="@{|/books/${targetNotebook.id}/notes/${targetNote.id}/update|}" method="post" id="updateForm">
+        <div class="w-[60%]">
+            <form th:action="@{|/books/${targetNotebook.id}/notes/${targetNote.id}/update|}" method="post"
+                  id="updateForm">
                 <div>
                     <input type="hidden" name="id" th:value="${targetNote.id}">
                 </div>
                 <div>
                     <input type="text" name="title" th:value="${targetNote.title}">
                 </div>
-                <div>
-                    <textarea name="content" cols="30" rows="10" th:text="${targetNote.content}"></textarea>
-                </div>
+                <input type="hidden" name="content" id="editor-body">
+                <div id="editor"></div>
                 <div>
                     <input type="button" value="수정" onclick="updateForm()">
                 </div>
             </form>
-            <form th:action="@{|/books/${targetNotebook.id}/notes/${targetNote.id}/delete|}" method="post" id="deleteForm">
+            <form th:action="@{|/books/${targetNotebook.id}/notes/${targetNote.id}/delete|}" method="post"
+                  id="deleteForm">
                 <input type="button" value="삭제" onclick="deleteForm();">
             </form>
         </div>
     </div>
-</div>
-</body>
-<script>
-    function updateForm() {
-        const form = document.getElementById("updateForm");
-        if(confirm("수정하시겠습니까?")) {
-            form.submit();
-        }
-    }
+    <script th:inline="javascript">
+        const Editor = toastui.Editor;
+        const editor = new Editor({
+            el: document.querySelector('#editor'),
+            height: '700px',
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            initialValue: [[${targetNote.content}]]
+        });
 
-    function deleteForm() {
-        const form = document.getElementById("deleteForm");
-        if(confirm("삭제하시겠습니까?")) {
-            form.submit();
+        editor.getMarkdown();
+    </script>
+    <script>
+        function updateForm() {
+            const form = document.getElementById("updateForm");
+            const editorBody = document.getElementById("editor-body");
+            if (confirm("수정하시겠습니까?")) {
+                const text = editor.getMarkdown();
+                editorBody.value = text;
+                form.submit();
+            }
         }
-    }
-</script>
+
+        function deleteForm() {
+            const form = document.getElementById("deleteForm");
+            if (confirm("삭제하시겠습니까?")) {
+                form.submit();
+            }
+        }
+    </script>
+</div>
 </html>

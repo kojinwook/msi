@@ -10,17 +10,12 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 public class MainDataDto {
     List<Notebook> notebookList = new ArrayList<>();
     Notebook targetNotebook;
     List<Note> noteList = new ArrayList<>();
     Note targetNote;
-
-
-
-
-
 }

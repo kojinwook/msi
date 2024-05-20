@@ -22,19 +22,18 @@ public class NoteController {
     private final NoteService noteService;
     private final MainService mainService;
 
-
     @PostMapping("/write")
     public String write(@PathVariable("notebookId") Long notebookId) {
-        Notebook notebook = mainService.getNotebook(notebookId);
-        noteService.saveDefault(notebook);
+
+        mainService.addToNotebook(notebookId);
         return "redirect:/";
     }
 
     @GetMapping("/{id}")
     public String detail(Model model, @PathVariable("notebookId") Long notebookId, @PathVariable("id") Long id) {
 
-        MainDataDto mainDataDto = mainService.getMainData(notebookId,id);
-        model.addAttribute("mainDataDto",mainDataDto);
+        MainDataDto mainDataDto = mainService.getMainData(notebookId, id);
+        model.addAttribute("mainDataDto", mainDataDto);
 
         return "main";
     }

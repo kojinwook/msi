@@ -13,15 +13,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequiredArgsConstructor
 public class NotebookController {
 
+    private final NotebookService notebookService;
+    private final MainService mainService;
 
-   private final NotebookService notebookService;
-   private final MainService    mainService;
     @PostMapping("/books/write")
     public String write() {
-
         mainService.saveDefaultNotebook();
         return "redirect:/";
 
+    }
+
+    @PostMapping("/groups/{notebookId}/books/write")
+    public String groupWrite(@PathVariable("notebookId") Long notebookId) {
+
+        mainService.saveGroupNotebook(notebookId);
+        return "redirect:/";
     }
 
     @GetMapping("/books/{id}")
@@ -31,4 +37,18 @@ public class NotebookController {
 
         return "redirect:/books/%d/notes/%d".formatted(id, note.getId());
     }
+
+    @PostMapping("/books/{id}/delete")
+    public String delete(@PathVariable("id") Long id) {
+//        mainService.delete(id);
+        notebookService.delete(id);
+        return "redirect:/";
+    }
+
+    @PostMapping("/books/{id}/update")
+    public String update(@PathVariable("id") Long id, Long targetNoteId,String name) {
+        notebookService.updateName(id, name);
+        return "redirect:/books/%d/notes/%d".formatted(id, targetNoteId);
+    }
+
 }

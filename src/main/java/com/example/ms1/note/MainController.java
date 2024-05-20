@@ -15,15 +15,13 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class MainController {
-
-   private final MainService mainService;
+    private final MainService mainService;
 
     @RequestMapping("/")
     public String main(Model model) {
 
         MainDataDto mainDataDto = mainService.getDefaultMainData();
-        model.addAttribute("mainDataDto",mainDataDto);
-
+        model.addAttribute("mainDataDto", mainDataDto);
         return "main";
     }
 
