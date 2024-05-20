@@ -11,19 +11,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotebookService {
     private final NotebookRepository   notebookRepository;
-    private final NoteService noteService;
     public Notebook getNotebook(Long notebookId){
         return notebookRepository.findById(notebookId).orElseThrow();
     }
     public List<Notebook> getNotebookList(){
         return notebookRepository.findAll();
     }
-    public void saveDefault() {
-        Notebook notebook = new Notebook();
-        notebook.setName("새노트북");
-
-        notebookRepository.save(notebook);
-        noteService.saveDefault(notebook);
+    public Notebook save(Notebook notebook){
+        return notebookRepository.save(notebook);
     }
 
 

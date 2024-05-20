@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NoteService {
     private final NoteRepository noteRepository;
-    private final NotebookService notebookService;
+
     public Note saveDefault(Notebook notebook) {
         Note note = new Note();
         note.setTitle("new title..");
@@ -23,15 +23,11 @@ public class NoteService {
         return noteRepository.save(note);
     }
 
-    public Notebook getNotebook(Long notebookId){
-        return notebookService.getNotebook(notebookId);
-    }
+
     public Note getNote(Long id){
         return noteRepository.findById(id).orElseThrow();
     }
-    public List<Notebook> getNotebookList(){
-        return notebookService.getNotebookList();
-    }
+
     public List<Note> getNoteListByNotebook(Notebook targetNotebook){
         return noteRepository.findByNotebook(targetNotebook);
     }

@@ -1,5 +1,6 @@
 package com.example.ms1.note.notebook;
 
+import com.example.ms1.note.MainService;
 import com.example.ms1.note.note.Note;
 import com.example.ms1.note.note.NoteService;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,11 @@ public class NotebookController {
 
 
    private final NotebookService notebookService;
-
+   private final MainService    mainService;
     @PostMapping("/books/write")
     public String write() {
 
-        notebookService.saveDefault();
+        mainService.saveDefault();
         return "redirect:/";
 
     }
