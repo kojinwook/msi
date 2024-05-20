@@ -16,34 +16,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MainController {
 
-    private final NotebookRepository notebookRepository;
-    private final NoteRepository noteRepository;
-    private final NoteService noteService;
+   private final MainService mainService;
 
     @RequestMapping("/")
     public String main(Model model) {
 
-        List<Notebook> notebookList = notebookRepository.findAll();
-        if (notebookList.isEmpty()) {
-            Notebook notebook = new Notebook();
-            notebook.setName("새노트");
-            notebookRepository.save(notebook);
-
-            return "redirect:/";
-        }
-        Notebook targetNotebook = notebookList.get(0);
-        List<Note> noteList = noteRepository.findByNotebook(targetNotebook);
-
-        if (noteList.isEmpty()) {
-            noteService.saveDefault(targetNotebook);
-            return "redirect:/";
-        }
-
-        model.addAttribute("noteList", noteList);
-        model.addAttribute("targetNote", noteList.get(0));
-        model.addAttribute("notebookList", notebookList);
-        model.addAttribute("targetNotebook", targetNotebook);
-
+        MainDataDto mainDataDto = mainService.getDefaultMainData();
+        model.addAttribute("mainDataDto",mainDataDto);
 
         return "main";
     }
